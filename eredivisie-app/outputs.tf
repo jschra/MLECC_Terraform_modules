@@ -20,18 +20,7 @@ output "api_gateway_endpoint" {
   value = join("", ["${aws_api_gateway_deployment.api_deployment.invoke_url}",
                     "${aws_api_gateway_stage.api_gateway_stage.stage_name}"]
                )
-  #value = "${aws_api_gateway_deployment.api_deployment.invoke_url}${aws_api_gateway_stage.api_gateway_stage.stage_name}"
 }
-
-# output "api_gateway_url" {
-#   description = "Url of the API"
-#   value       = aws_api_gateway_deployment.api_deployment.invoke_url
-# }
-
-# output "api_stage" {
-#   description = "API version"
-#   value       = aws_api_gateway_stage.api_gateway_stage.stage_name
-# }
 
 output "api_key_value" {
   description = "The value of the API key"
