@@ -37,7 +37,7 @@ resource "aws_lambda_function" "api" {
 # -------------------------------------------------------------
 
 resource "aws_lambda_layer_version" "lambda_layer_pandas" {
-  filename   = "../lambda/layers/pandas/python.zip"
+  filename   = "${path.module}../lambda/layers/pandas/python.zip"
   layer_name = "pandas"
 
   compatible_runtimes = ["python3.7"]

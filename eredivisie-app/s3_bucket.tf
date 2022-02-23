@@ -19,7 +19,7 @@ resource "aws_s3_bucket" "api-data" {
 resource "aws_s3_bucket_object" "api-data-object" {
   bucket   = aws_s3_bucket.api-data.id
   key      = "eredivisie_results.csv"
-  source   = "${path.module}/data/eredivisie_results.csv"
+  source   = "${path.module}/../data/eredivisie_results.csv"
   etag     = filemd5("${path.module}/../data/eredivisie_results.csv")
 }
 
