@@ -17,11 +17,10 @@ resource "aws_s3_bucket" "api-data" {
 }
 
 resource "aws_s3_bucket_object" "api-data-object" {
-  #for_each = fileset("../data/", "*")
   bucket   = aws_s3_bucket.api-data.id
   key      = "eredivisie_results.csv"
-  source   = "../data/eredivisie_results.csv"
-  etag     = filemd5("../data/eredivisie_results.csv")
+  source   = "${path.module}/data/eredivisie_results.csv"
+  etag     = filemd5("${path.module}/data/eredivisie_results.csv")
 }
 
 # -------------------------------------------------------------
@@ -47,7 +46,7 @@ resource "aws_s3_bucket" "lambda-bucket" {
 data "archive_file" "lambda_api" {
   type = "zip"
 
-  source_dir  = "../lambda/lambda_payload/api"
+  source_dir  = "${path.module}/lambda/lambda_payload/api"
   output_path = "api.zip"
 
 }
