@@ -1,14 +1,14 @@
 # -------------------------------------------------------------
 # API Data
 # -------------------------------------------------------------
-
 resource "random_pet" "api-data-name" {
-  prefix = "${var.environment}-terraform-api-data"
-  length = 5
+  prefix = "${var.environment}-api-data"
+  length = 3
 }
 
 resource "aws_s3_bucket" "api-data" {
   bucket = random_pet.api-data-name.id
+  acl    = "private"
 
   tags = {
     Name        = "api data"
@@ -16,31 +16,27 @@ resource "aws_s3_bucket" "api-data" {
   }
 }
 
-resource "aws_s3_bucket_acl" "api-data-acl" {
-  bucket = aws_s3_bucket.api-data.id
-  acl    = "private"
-}
-
-resource "aws_s3_object" "api-data-object" {
-  for_each = fileset("../data/", "*")
+resource "aws_s3_bucket_object" "api-data-object" {
+  #for_each = fileset("../data/", "*")
   bucket   = aws_s3_bucket.api-data.id
-  key      = each.value
-  source   = "../data/${each.value}"
-  etag     = filemd5("../data/${each.value}")
+  key      = "eredivisie_results.csv"
+  source   = "../data/eredivisie_results.csv"
+  etag     = filemd5("../data/eredivisie_results.csv")
 }
 
 # -------------------------------------------------------------
-# Lambda Data
+# Lambda Logic
 # -------------------------------------------------------------
 
 resource "random_pet" "lambda-bucket-name" {
   prefix = "${var.environment}-lambda-bucket"
-  length = 5
+  length = 3
 }
 
 resource "aws_s3_bucket" "lambda-bucket" {
   bucket = random_pet.lambda-bucket-name.id
 
+  acl           = "private"
   force_destroy = true
 
   tags = {
@@ -48,20 +44,15 @@ resource "aws_s3_bucket" "lambda-bucket" {
   }
 }
 
-resource "aws_s3_bucket_acl" "lambda-bucket-acl" {
-  bucket = aws_s3_bucket.lambda-bucket.id
-  acl    = "private"
-}
-
 data "archive_file" "lambda_api" {
   type = "zip"
 
-  source_dir  = "./lambda_payload/api"
+  source_dir  = "../lambda/lambda_payload/api"
   output_path = "api.zip"
 
 }
 
-resource "aws_s3_object" "lambda_api" {
+resource "aws_s3_bucket_object" "lambda_api" {
   bucket = aws_s3_bucket.lambda-bucket.id
 
   key    = "api.zip"

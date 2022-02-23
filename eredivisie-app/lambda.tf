@@ -1,11 +1,14 @@
 # -------------------------------------------------------------
 # API Lambda function
 # -------------------------------------------------------------
+
+resource "random_uuid" "lambda" {}
+
 resource "aws_lambda_function" "api" {
-  function_name = "api"
+  function_name = "${var.environment}-eredivisie-lambda-${random_uuid.lambda.result}"
 
   s3_bucket = aws_s3_bucket.lambda-bucket.id
-  s3_key    = aws_s3_object.lambda_api.key
+  s3_key    = aws_s3_bucket_object.lambda_api.key
 
   runtime = "python3.7"
   handler = "lambda_function.lambda_handler"
@@ -16,19 +19,25 @@ resource "aws_lambda_function" "api" {
 
   layers = [aws_lambda_layer_version.lambda_layer_pandas.arn, "arn:aws:lambda:eu-central-1:292169987271:layer:AWSLambda-Python37-SciPy1x:35"]
 
+  environment {
+    variables = {
+      BUCKET_NAME = aws_s3_bucket.api-data.id
+      BUCKET_KEY  = aws_s3_bucket_object.api-data-object.key
+    }
+  }
+
   tags = {
     Name        = "api lambda"
     Environment = "${var.environment}"
   }
 }
 
-
 # -------------------------------------------------------------
 # Lambda layer
 # -------------------------------------------------------------
 
 resource "aws_lambda_layer_version" "lambda_layer_pandas" {
-  filename   = "./layers/pandas/python.zip"
+  filename   = "../lambda/layers/pandas/python.zip"
   layer_name = "pandas"
 
   compatible_runtimes = ["python3.7"]
@@ -57,7 +66,6 @@ resource "aws_iam_role" "lambda_exec" {
   })
 }
 
-
 # Create policy to access s3 bucket
 resource "aws_iam_policy" "s3_bucket_policy" {
   name        = "s3-api-data-bucket-access"
@@ -79,21 +87,8 @@ resource "aws_iam_policy" "s3_bucket_policy" {
 EOF
 }
 
-
 # Add policy to lambda_exec role
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = aws_iam_policy.s3_bucket_policy.arn
 }
-
-
-
-# -------------------------------------------------------------
-# Cloudwatch monitoring
-# -------------------------------------------------------------
-
-# resource "aws_cloudwatch_log_group" "api-monitoring" {
-#   name = "/aws/lambda/${aws_lambda_function.api.function_name}"
-
-#   retention_in_days = 30
-# }

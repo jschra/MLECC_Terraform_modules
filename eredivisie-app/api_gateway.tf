@@ -2,8 +2,10 @@
 # API Gateway
 # -------------------------------------------------------------
 
+resource "random_uuid" "api_gateway" {}
+
 resource "aws_api_gateway_rest_api" "api_gateway" {
-  name        = "${var.environment} Eredivisie api gateway"
+  name        = "${var.environment}-eredivisie-api-${random_uuid.api_gateway.result}"
   description = "API Gateway for api lambda function that retrieves Eredivisie data"
 }
 
@@ -50,11 +52,11 @@ resource "aws_api_gateway_stage" "api_gateway_stage" {
 
 # Key and usage plan
 resource "aws_api_gateway_api_key" "api_key" {
-  name = "api_${var.environment}_default_key"
+  name = "api_${var.environment}_key"
 }
 
 resource "aws_api_gateway_usage_plan" "api_usage_plan" {
-  name         = "Eredivisie api basic"
+  name         = "${var.environment}-eredivisie-api-basic"
   description  = "Basic usage plan for Eredivisie API"
   product_code = "Eredvisie basic"
 
